@@ -13,6 +13,7 @@ import Dashboard from './components/Dashboard';
 import StudentList from './components/StudentList';
 import SessionTracker from './components/SessionTracker';
 import Gradebook from './components/Gradebook';
+import AuthPage from './components/AuthPage';
 import { cn } from './lib/utils';
 
 type View = 'dashboard' | 'students' | 'sessions' | 'grades';
@@ -54,35 +55,7 @@ export default function App() {
   }
 
   if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-white font-sans p-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md text-center"
-        >
-          <div className="mb-8 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-900 text-white">
-            <GraduationCap className="w-8 h-8" />
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 mb-2">ClassMaster</h1>
-          <p className="text-gray-500 mb-8">Empowering teachers with effortless performance tracking and parent communication.</p>
-          
-          <button
-            onClick={signIn}
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-sm"
-          >
-            <LogIn className="w-5 h-5" />
-            Sign in with Google
-          </button>
-
-          {connectionError && (
-            <p className="mt-4 text-xs text-red-500">
-              Connection error. Please check your Firebase configuration or internet.
-            </p>
-          )}
-        </motion.div>
-      </div>
-    );
+    return <AuthPage connectionError={connectionError} />;
   }
 
   const renderView = () => {

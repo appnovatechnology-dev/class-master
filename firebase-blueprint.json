@@ -1,5 +1,17 @@
 {
   "entities": {
+    "Teacher": {
+      "title": "Teacher",
+      "description": "Information about the teacher.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "phone", "email", "createdAt"]
+    },
     "Student": {
       "title": "Student",
       "description": "Represents a student in a class.",
@@ -72,6 +84,7 @@
     }
   },
   "firestore": {
+    "/teachers/{teacherUid}": { "schema": "Teacher", "description": "Teacher profile data." },
     "/students/{studentId}": { "schema": "Student", "description": "Collection of students." },
     "/sessions/{sessionId}": { "schema": "Session", "description": "Collection of class sessions." },
     "/attendance/{attendanceId}": { "schema": "Attendance", "description": "Attendance logs." },

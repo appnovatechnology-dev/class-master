@@ -11,6 +11,14 @@ export interface Student {
   createdAt: Timestamp;
 }
 
+export interface Teacher {
+  uid: string;
+  name: string;
+  phone: string;
+  email: string;
+  createdAt: Timestamp;
+}
+
 export interface Session {
   id: string;
   date: Timestamp;
