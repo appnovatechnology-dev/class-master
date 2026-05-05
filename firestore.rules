@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(data) {
+      return isSignedIn() && data.teacherUid == request.auth.uid;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Validation Helpers ---
+
+    function isValidStudent(data) {
+      return data.keys().hasAll(['studentId', 'name', 'gradeLevel', 'parentName', 'parentPhone', 'teacherUid', 'createdAt'])
+        && data.keys().size() == 7
+        && data.studentId is string && data.studentId.size() <= 50
+        && data.name is string && data.name.size() <= 100
+        && data.gradeLevel is string && data.gradeLevel.size() <= 20
+        && data.parentName is string && data.parentName.size() <= 100
+        && data.parentPhone is string && data.parentPhone.size() <= 20
+        && data.teacherUid == request.auth.uid
+        && data.createdAt is timestamp;
+    }
+
+    function isValidSession(data) {
+      return data.keys().hasAll(['date', 'title', 'gradeLevel', 'teacherUid', 'createdAt'])
+        && data.keys().size() == 5
+        && data.title is string && data.title.size() <= 200
+        && data.gradeLevel is string && data.gradeLevel.size() <= 20
+        && data.teacherUid == request.auth.uid
+        && data.date is timestamp
+        && data.createdAt is timestamp;
+    }
+
+    function isValidAttendance(data) {
+      return data.keys().hasAll(['sessionId', 'studentId', 'teacherUid', 'status', 'date'])
+        && data.keys().size() == 5
+        && data.sessionId is string
+        && data.studentId is string
+        && data.teacherUid == request.auth.uid
+        && data.status in ['present', 'absent', 'late']
+        && data.date is timestamp;
+    }
+
+    function isValidGrade(data) {
+      return data.keys().hasAll(['studentId', 'teacherUid', 'title', 'score', 'maxScore', 'date'])
+        && data.keys().size() == 6
+        && data.studentId is string
+        && data.teacherUid == request.auth.uid
+        && data.title is string && data.title.size() <= 200
+        && data.score is number
+        && data.maxScore is number
+        && data.date is timestamp;
+    }
+
+    function isValidPerformance(data) {
+      return data.keys().hasAll(['sessionId', 'studentId', 'teacherUid', 'feedback', 'rating', 'date', 'whatsappSent'])
+        && data.keys().size() == 7
+        && data.sessionId is string
+        && data.studentId is string
+        && data.teacherUid == request.auth.uid
+        && data.feedback is string && data.feedback.size() <= 1000
+        && data.rating is number && data.rating >= 1 && data.rating <= 5
+        && data.date is timestamp
+        && data.whatsappSent is bool;
+    }
+
+    // --- Collection Rules ---
+
+    match /students/{studentId} {
+      allow get: if isOwner(resource.data);
+      allow list: if isSignedIn() && resource.data.teacherUid == request.auth.uid;
+      allow create: if isValidId(studentId) && isSignedIn() && isValidStudent(request.resource.data);
+      allow update: if isOwner(resource.data) && isValidStudent(request.resource.data)
+                    && request.resource.data.teacherUid == resource.data.teacherUid;
+      allow delete: if isOwner(resource.data);
+    }
+
+    match /sessions/{sessionId} {
+      allow get: if isOwner(resource.data);
+      allow list: if isSignedIn() && resource.data.teacherUid == request.auth.uid;
+      allow create: if isValidId(sessionId) && isSignedIn() && isValidSession(request.resource.data);
+      allow update: if isOwner(resource.data) && isValidSession(request.resource.data)
+                    && request.resource.data.teacherUid == resource.data.teacherUid;
+      allow delete: if isOwner(resource.data);
+    }
+
+    match /attendance/{attendanceId} {
+      allow get: if isOwner(resource.data);
+      allow list: if isSignedIn() && resource.data.teacherUid == request.auth.uid;
+      allow create: if isValidId(attendanceId) && isSignedIn() && isValidAttendance(request.resource.data);
+      allow update: if isOwner(resource.data) && isValidAttendance(request.resource.data)
+                    && request.resource.data.teacherUid == resource.data.teacherUid;
+      allow delete: if isOwner(resource.data);
+    }
+
+    match /grades/{gradeId} {
+      allow get: if isOwner(resource.data);
+      allow list: if isSignedIn() && resource.data.teacherUid == request.auth.uid;
+      allow create: if isValidId(gradeId) && isSignedIn() && isValidGrade(request.resource.data);
+      allow update: if isOwner(resource.data) && isValidGrade(request.resource.data)
+                    && request.resource.data.teacherUid == resource.data.teacherUid;
+      allow delete: if isOwner(resource.data);
+    }
+
+    match /performance/{performanceId} {
+      allow get: if isOwner(resource.data);
+      allow list: if isSignedIn() && resource.data.teacherUid == request.auth.uid;
+      allow create: if isValidId(performanceId) && isSignedIn() && isValidPerformance(request.resource.data);
+      allow update: if isOwner(resource.data) && isValidPerformance(request.resource.data)
+                    && request.resource.data.teacherUid == resource.data.teacherUid;
+      allow delete: if isOwner(resource.data);
+    }
+  }
+}

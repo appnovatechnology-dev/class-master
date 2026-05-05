@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Represents a student in a class.",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string", "description": "Unique ID assigned by the teacher (e.g., ST-101)." },
+        "name": { "type": "string" },
+        "gradeLevel": { "type": "string", "description": "Grade level (1-12)." },
+        "parentName": { "type": "string" },
+        "parentPhone": { "type": "string", "description": "WhatsApp-enabled phone number." },
+        "teacherUid": { "type": "string", "description": "UID of the teacher who owns this student record." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "name", "gradeLevel", "parentName", "parentPhone", "teacherUid", "createdAt"]
+    },
+    "Session": {
+      "title": "Session",
+      "description": "A single lesson or class session.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date-time" },
+        "title": { "type": "string", "description": "E.g., Intro to Algebra." },
+        "gradeLevel": { "type": "string" },
+        "teacherUid": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "title", "gradeLevel", "teacherUid", "createdAt"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "Attendance record for a student in a session.",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "studentId": { "type": "string", "description": "Firebase Doc ID of the student." },
+        "teacherUid": { "type": "string" },
+        "status": { "type": "string", "enum": ["present", "absent", "late"] },
+        "date": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sessionId", "studentId", "teacherUid", "status", "date"]
+    },
+    "Grade": {
+      "title": "Grade",
+      "description": "A grade for a student on an assignment.",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "teacherUid": { "type": "string" },
+        "title": { "type": "string", "description": "Assignment title." },
+        "score": { "type": "number" },
+        "maxScore": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "teacherUid", "title", "score", "maxScore", "date"]
+    },
+    "Performance": {
+      "title": "Performance",
+      "description": "Teacher feedback for a student during a session.",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "teacherUid": { "type": "string" },
+        "feedback": { "type": "string" },
+        "rating": { "type": "number", "description": "Scale of 1-5." },
+        "date": { "type": "string", "format": "date-time" },
+        "whatsappSent": { "type": "boolean", "description": "Whether the notification was sent." }
+      },
+      "required": ["sessionId", "studentId", "teacherUid", "feedback", "rating", "date"]
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": { "schema": "Student", "description": "Collection of students." },
+    "/sessions/{sessionId}": { "schema": "Session", "description": "Collection of class sessions." },
+    "/attendance/{attendanceId}": { "schema": "Attendance", "description": "Attendance logs." },
+    "/grades/{gradeId}": { "schema": "Grade", "description": "Grade entries." },
+    "/performance/{performanceId}": { "schema": "Performance", "description": "Performance reports." }
+  }
+}
